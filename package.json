@@ -1,6 +1,6 @@
 {
     "name": "apep-std-sep",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "Apep seperator combinators.",
     "author": "Matt Bierner",
     "license": "MIT",

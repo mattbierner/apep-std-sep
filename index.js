@@ -24,12 +24,30 @@ pep_sep.sepBy = function (sep) {
 };
 
 /**
-    Currying convenience function to create a combinator that runs it's input
+    Convenience function to create a combinator that runs it's input
     generator between two generators. 
 */
 pep_sep.between = function (first, left) {
-    return function (middle) {
-        return pep.seq(first, middle, last);
+    return function () {
+        for (var _len2 = arguments.length, middle = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+            middle[_key2] = arguments[_key2];
+        }
+
+        return pep.seq.apply(pep, [first].concat(middle, [last]));
+    };
+};
+
+/**
+    Convenience function to create a combinator that runs it's input
+    generator before some end generator.
+*/
+pep_sep.endBy = function (end) {
+    return function () {
+        for (var _len3 = arguments.length, start = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+            start[_key3] = arguments[_key3];
+        }
+
+        return pep.seq.apply(pep, start.concat([last]));
     };
 };
 

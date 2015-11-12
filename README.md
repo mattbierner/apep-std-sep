@@ -1,26 +1,26 @@
-# Apep-std-vars
+# Apep-std-sep
 
-Common generators and combinators for working with variables in [Apep Javascript text generation library][apep].
+Helper combinators for working with sequencing generators [Apep Javascript text generation library][apep].
 
 ## Usage
 ```sh
-$ npm install apep-std-vars
+$ npm install apep-std-sep
 ```
 
-You can either use `apep-std-vars` as its own include:
+You can either use `apep-std-sep` as its own include:
 
 ```js
 const pep = require('apep');
-const pep_vars = require('apep-std-vars');
+const pep_sep = require('apep-std-sep');
 
-const p = pep_vars.store(...);
+const p = pep_sep.sepBy(...);
 ```
 
 Or by extending an Apep instance:
 
 ```js
 let pep = require('apep');
-pep = require('apep-std-vars')(pep);
+pep = require('apep-std-sep')(pep);
 
 const p = pep.store(...);
 ```
@@ -29,55 +29,51 @@ Extension does not alter the original Apep include but creates a simple proxy th
 
 ## Documentation
 
-#### `clear(name)`
-Delete a variable.
-
-* `name` - Variable name.
-
-#### `store(name, generator)`
-Get the currently stored value of a variable or compute it with a generator.
-
-* `name` - Variable name.
-* `generator` -  Generator run to produce the value.
+#### `sepBy(sep, ...generators)`
+Run `sep` between each `generators`.
 
 ```js
-// Make sure we always use the same name after computing it.
-const name = pep_vars.store('name', pep.choice('Alice', 'Bob'))
+const p = pep_sep.sepBy(pep.str('\n'), 'a', 'b', 'c');
 
-const p = pep.seq(
-    'Affirmative, ', name '. I read you. ',
-    'Im sorry, ', name, ". Im afraid I cant do that.");
-
-p.run() === "Affirmative, Dave. I read you. Im sorry Dave. Im afraid I cant do that."
-p.run() === "Affirmative, Alice. I read you. Im sorry Alice. Im afraid I cant do that."
+Array.from(p) === ['a', '\n', 'b', '\n', 'c'];
 ```
 
-Always stores value as strings. The output of multiple
-yielding generators are joined together into a single string value. `store` yields this combined value as its result.
+#### `between(first, last)(...middle)`
+Convenience function to create a combinator that runs it's input generator between two generators. 
 
 ```js
-const v = pep_vars.store('joined_var',
-    pep.seq(
-        pep.lit(1.2),
-        pep.lit({}),
-        pep.lit(null)));
-
-const p = pep.seq(v, v)
-
-Array.from(p) === ['1.2[Object object]null', '1.2[Object object]null'];
+pep_sep.between('a', 'c')('b') === pep.seq('a', 'b', 'c')
 ```
 
-Use `storeCombined` if you need to store non-string values.
+#### `endWith(last)(...first)`
+Convenience function to create a combinator that runs it's input generator between two generators. 
 
+```js
+pep_sep.endWith('a')('b', 'c') === pep.seq('b', 'c', 'a');
+```
 
-#### `storeCombined(f, z, name, generator)`
-Same behavior as store, but combines multiple yielded values with an accumulator function.
+#### `sepMany(sep, g, prob = 0.5)`
+Run `g` one or more times, outputting `sep` between instances.
+    
+* `sep` - Separator generator run between each invocation of `g`.
+* `g` - Generator.
+* `prob` - Probability that many will continue to produce a value.
 
-* `f` - Accumulator function to reduce multiple yields from `generator` to a single value.
-* `z` - Initial value for accumulator.
-* `name` - Variable name.
-* `generator` - Generator run to produce the value.
+```js
+const words = pep.choice('quick', 'brown', 'fox', 'jumps');
 
+const p = pep_sep.sepMany(' ', words);
+
+p.run() === 'fox quick';
+p.run() === '';
+p.run() === 'jumps';
+p.run() === 'jumps fox brown';
+```
+
+#### `sepMany1(sep, g, prob = 0.5)`
+Run `g` one or more times, outputting `sep` between instances.
+    
+See `sepMany`.
 
 
 [apep]: https://github.com/mattbierner/apep
