@@ -18,15 +18,15 @@ pep_sep.sepBy = (sep, ...generators) =>
     Convenience function to create a combinator that runs it's input
     generator between two generators. 
 */
-pep_sep.between = (first, left) =>
+pep_sep.between = (first, last) =>
     (...middle) => pep.seq(first, ...middle, last);
 
 /**
     Convenience function to create a combinator that runs it's input
     generator before some end generator.
 */
-pep_sep.endBy = (end) =>
-    (...start) => pep.seq(...start, last);
+pep_sep.endWith = (end) =>
+    (...start) => pep.seq(...start, end);
 
 /**
     Run `g` one or more times, outputting `sep` between instances.
